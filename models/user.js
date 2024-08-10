@@ -1,33 +1,32 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt-nodejs");
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
+const Product = require('./product');
+const Order = require('./orders');
 
-const userSchema = Schema({
-  username: {
-    type: String,
-    require: true,
-  },
-  email: {
-    type: String,
-    require: true,
-  },
-  password: {
-    type: String,
-    require: true,
-  },
+const userSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String
+    },
+    Address: {
+        type: String
+    },
+    googleId: {
+        type: String
+    },
+    cart: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Products'
+        }
+    ]
 });
 
-// encrypt the password before storing
-userSchema.methods.encryptPassword = (password) => {
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(5), null);
-};
+userSchema.plugin(passportLocalMongoose);
 
-userSchema.methods.validPassword = function (candidatePassword) {
-  if (this.password != null) {
-    return bcrypt.compareSync(candidatePassword, this.password);
-  } else {
-    return false;
-  }
-};
+const User = mongoose.model('users', userSchema);
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = User;
